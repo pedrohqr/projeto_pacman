@@ -114,7 +114,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        "*** YOUR CODE HERE ***"
+      
         chosen_action = self.minimax(gameState, self.depth)[1]
         return chosen_action
         
@@ -154,8 +154,44 @@ def betterEvaluationFunction(currentGameState):
 
     DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()    
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    
+    """ Manhattan distance to the foods from the current state """
+    foodList = newFood.asList()
+    from util import manhattanDistance
+    foodDistance = [0]
+    for pos in foodList:
+        foodDistance.append(manhattanDistance(newPos,pos))
+
+    """ Manhattan distance to each ghost from the current state"""
+    ghostPos = []
+    for ghost in newGhostStates:
+        ghostPos.append(ghost.getPosition())
+    ghostDistance = [0]
+    for pos in ghostPos:
+        ghostDistance.append(manhattanDistance(newPos,pos))
+
+    numberofPowerPellets = len(currentGameState.getCapsules())
+
+    score = 0
+    numberOfNoFoods = len(newFood.asList(False))           
+    sumScaredTimes = sum(newScaredTimes)
+    sumGhostDistance = sum (ghostDistance)
+    reciprocalfoodDistance = 0
+    if sum(foodDistance) > 0:
+        reciprocalfoodDistance = 1.0 / sum(foodDistance)
+        
+    score += currentGameState.getScore()  + reciprocalfoodDistance + numberOfNoFoods
+
+    if sumScaredTimes > 0:    
+        score +=   sumScaredTimes + (-1 * numberofPowerPellets) + (-1 * sumGhostDistance)
+    else :
+        score +=  sumGhostDistance + numberofPowerPellets
+    return score
+
 
 # Abbreviation
 better = betterEvaluationFunction
